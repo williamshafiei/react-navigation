@@ -25,15 +25,14 @@ import { createURL } from 'expo-linking';
 import * as SplashScreen from 'expo-splash-screen';
 import * as React from 'react';
 import {
-  Dimensions,
   I18nManager,
   Linking,
   LogBox,
   Platform,
-  ScaledSize,
   ScrollView,
   StatusBar,
   Text,
+  useWindowDimensions,
 } from 'react-native';
 import {
   DarkTheme as PaperDarkTheme,
@@ -118,18 +117,7 @@ export default function App() {
     };
   }, [theme.colors, theme.dark]);
 
-  const [dimensions, setDimensions] = React.useState(Dimensions.get('window'));
-
-  React.useEffect(() => {
-    const onDimensionsChange = ({ window }: { window: ScaledSize }) => {
-      setDimensions(window);
-    };
-
-    Dimensions.addEventListener('change', onDimensionsChange);
-
-    return () => Dimensions.removeEventListener('change', onDimensionsChange);
-  }, []);
-
+  const dimensions = useWindowDimensions();
   const navigationRef = useNavigationContainerRef();
 
   useReduxDevToolsExtension(navigationRef);
@@ -167,6 +155,7 @@ export default function App() {
           // iOS (bare): xcrun simctl openurl booted rne://127.0.0.1:19000/--/simple-stack
           // The first segment of the link is the the scheme + host (returned by `Linking.makeUrl`)
           prefixes: [createURL('/')],
+          enabled: false,
           config: {
             initialRouteName: 'Home',
             screens: SCREEN_NAMES.reduce<PathConfigMap<RootStackParamList>>(

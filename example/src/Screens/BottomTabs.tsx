@@ -12,7 +12,12 @@ import {
 import type { StackScreenProps } from '@react-navigation/stack';
 import { BlurView } from 'expo-blur';
 import * as React from 'react';
-import { ScrollView, StatusBar, StyleSheet } from 'react-native';
+import {
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  useWindowDimensions,
+} from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import Albums from '../Shared/Albums';
@@ -67,9 +72,15 @@ export default function BottomTabsScreen({
     });
   }, [navigation, routeName]);
 
+  const dimensions = useWindowDimensions();
+
+  const isLargeScreen = dimensions.width >= 1024;
+
   return (
     <BottomTabs.Navigator
       screenOptions={{
+        tabBarPosition: isLargeScreen ? 'left' : 'bottom',
+        tabBarLabelPosition: 'below-icon',
         headerLeft: (props) => (
           <HeaderBackButton {...props} onPress={navigation.goBack} />
         ),

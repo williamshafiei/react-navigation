@@ -45,6 +45,8 @@ export default function BottomTabView(props: Props) {
   } = props;
 
   const focusedRouteKey = state.routes[state.index].key;
+  const focusedOptions = descriptors[focusedRouteKey].options;
+
   const [loaded, setLoaded] = React.useState([focusedRouteKey]);
 
   if (!loaded.includes(focusedRouteKey)) {
@@ -62,12 +64,13 @@ export default function BottomTabView(props: Props) {
         ...SafeAreaProviderCompat.initialMetrics.insets,
         ...props.safeAreaInsets,
       },
-      style: descriptors[state.routes[state.index].key].options.tabBarStyle,
+      style: focusedOptions.tabBarStyle,
     })
   );
 
-  const renderTabBar = () => {
-    return (
+  const tabBarPosition = focusedOptions.tabBarPosition ?? 'bottom';
+  const tabBarElement = (
+    <BottomTabBarHeightCallbackContext.Provider value={setTabBarHeight}>
       <SafeAreaInsetsContext.Consumer>
         {(insets) =>
           tabBar({
@@ -83,19 +86,29 @@ export default function BottomTabView(props: Props) {
           })
         }
       </SafeAreaInsetsContext.Consumer>
-    );
-  };
+    </BottomTabBarHeightCallbackContext.Provider>
+  );
 
-  const { routes } = state;
+  const flexDirectionForPosition = {
+    left: 'row-reverse',
+    right: 'row',
+    top: 'column-reverse',
+    bottom: 'column',
+  } as const;
 
   return (
-    <SafeAreaProviderCompat>
+    <SafeAreaProviderCompat
+      style={[
+        styles.container,
+        { flexDirection: flexDirectionForPosition[tabBarPosition] },
+      ]}
+    >
       <MaybeScreenContainer
         enabled={detachInactiveScreens}
         hasTwoStates
-        style={styles.container}
+        style={styles.screens}
       >
-        {routes.map((route, index) => {
+        {state.routes.map((route, index) => {
           const descriptor = descriptors[route.key];
           const { lazy = true, unmountOnBlur } = descriptor.options;
           const isFocused = state.index === index;
@@ -152,15 +165,16 @@ export default function BottomTabView(props: Props) {
           );
         })}
       </MaybeScreenContainer>
-      <BottomTabBarHeightCallbackContext.Provider value={setTabBarHeight}>
-        {renderTabBar()}
-      </BottomTabBarHeightCallbackContext.Provider>
+      {tabBarElement}
     </SafeAreaProviderCompat>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  screens: {
     flex: 1,
     overflow: 'hidden',
   },

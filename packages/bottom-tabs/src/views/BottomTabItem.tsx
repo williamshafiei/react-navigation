@@ -269,7 +269,6 @@ export default function BottomTabBarItem({
     // @ts-expect-error: keep for compatibility with older React Native versions
     accessibilityStates: focused ? ['selected'] : [],
     style: [
-      styles.tab,
       { backgroundColor },
       horizontal ? styles.tabLandscape : styles.tabPortrait,
       style,
@@ -284,10 +283,6 @@ export default function BottomTabBarItem({
 }
 
 const styles = StyleSheet.create({
-  tab: {
-    flex: 1,
-    alignItems: 'center',
-  },
   tabPortrait: {
     justifyContent: 'flex-end',
     flexDirection: 'column',
@@ -301,11 +296,12 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   labelBeneath: {
+    marginTop: 5,
     fontSize: 10,
   },
   labelBeside: {
     fontSize: 13,
-    marginLeft: 20,
+    marginLeft: 5,
     marginTop: 3,
   },
   button: {

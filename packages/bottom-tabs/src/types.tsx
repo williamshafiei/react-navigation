@@ -90,6 +90,11 @@ export type BottomTabNavigationOptions = HeaderOptions & {
   title?: string;
 
   /**
+   * Position of the tab bar on the screen.
+   */
+  tabBarPosition?: 'top' | 'bottom' | 'left' | 'right';
+
+  /**
    * Title string of a tab displayed in the tab bar
    * or a function that given { focused: boolean, color: string, position: 'below-icon' | 'beside-icon' } returns a React.Node to display in tab bar.
    *

@@ -140,6 +140,7 @@ export default function BottomTabBar({
   const focusedOptions = focusedDescriptor.options;
 
   const {
+    tabBarPosition,
     tabBarShowLabel,
     tabBarHideOnKeyboard = false,
     tabBarVisibilityAnimationConfig,
@@ -252,16 +253,12 @@ export default function BottomTabBar({
   });
 
   const tabBarBackgroundElement = tabBarBackground?.();
+  const tabBarOnSides = tabBarPosition === 'left' || tabBarPosition === 'right';
 
   return (
     <Animated.View
       style={[
         styles.tabBar,
-        {
-          backgroundColor:
-            tabBarBackgroundElement != null ? 'transparent' : colors.card,
-          borderTopColor: colors.border,
-        },
         {
           transform: [
             {
@@ -277,12 +274,35 @@ export default function BottomTabBar({
           // Absolutely position the tab bar so that the content is below it
           // This is needed to avoid gap at bottom when the tab bar is hidden
           position: isTabBarHidden ? 'absolute' : (null as any),
+          backgroundColor:
+            tabBarBackgroundElement != null ? 'transparent' : colors.card,
+          borderColor: colors.border,
+          height: tabBarOnSides ? (null as any) : tabBarHeight,
         },
-        {
-          height: tabBarHeight,
-          paddingBottom,
-          paddingHorizontal: Math.max(insets.left, insets.right),
-        },
+        tabBarOnSides
+          ? [
+              {
+                paddingTop: insets.top,
+                paddingBottom: insets.bottom,
+              },
+              tabBarPosition === 'right'
+                ? {
+                    paddingRight: insets.right,
+                    borderLeftWidth: StyleSheet.hairlineWidth,
+                  }
+                : {
+                    paddingLeft: insets.left,
+                    borderRightWidth: StyleSheet.hairlineWidth,
+                  },
+            ]
+          : [
+              {
+                paddingHorizontal: Math.max(insets.left, insets.right),
+              },
+              tabBarPosition === 'top'
+                ? { borderBottomWidth: StyleSheet.hairlineWidth }
+                : { borderTopWidth: StyleSheet.hairlineWidth, paddingBottom },
+            ],
         tabBarStyle,
       ]}
       pointerEvents={isTabBarHidden ? 'none' : 'auto'}
@@ -291,7 +311,13 @@ export default function BottomTabBar({
       <View pointerEvents="none" style={StyleSheet.absoluteFill}>
         {tabBarBackgroundElement}
       </View>
-      <View accessibilityRole="tablist" style={styles.content}>
+      <View
+        accessibilityRole="tablist"
+        style={[
+          styles.content,
+          { flexDirection: tabBarOnSides ? 'column' : 'row' },
+        ]}
+      >
         {routes.map((route, index) => {
           const focused = index === state.index;
           const { options } = descriptors[route.key];
@@ -365,7 +391,7 @@ export default function BottomTabBar({
                   showLabel={tabBarShowLabel}
                   labelStyle={options.tabBarLabelStyle}
                   iconStyle={options.tabBarIconStyle}
-                  style={options.tabBarItemStyle}
+                  style={[styles.tabItem, options.tabBarItemStyle]}
                 />
               </NavigationRouteContext.Provider>
             </NavigationContext.Provider>
@@ -381,8 +407,11 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    borderTopWidth: StyleSheet.hairlineWidth,
     elevation: 8,
+  },
+  tabItem: {
+    flex: 1,
+    alignItems: 'center',
   },
   content: {
     flex: 1,
