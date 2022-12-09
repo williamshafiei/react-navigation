@@ -1,4 +1,4 @@
-import { Link, useLinkBuilder, useTheme } from '@react-navigation/native';
+import { Link, useLinkTools, useTheme } from '@react-navigation/native';
 import * as React from 'react';
 import {
   Animated,
@@ -33,7 +33,7 @@ const LinkPressable = ({
   children: React.ReactNode;
   onPress?: () => void;
 }) => {
-  const { buildAction } = useLinkBuilder();
+  const { buildAction } = useLinkTools();
   if (Platform.OS === 'web' && href) {
     // React Native Web doesn't forward `onClick` if we use `TouchableWithoutFeedback`.
     // We need to use `onClick` to be able to prevent default browser handling of links.

@@ -9,7 +9,7 @@ import {
 import {
   ParamListBase,
   StackNavigationState,
-  useLinkBuilder,
+  useLinkTools,
 } from '@react-navigation/native';
 import * as React from 'react';
 import { Image, StyleSheet, View } from 'react-native';
@@ -34,7 +34,7 @@ const TRANSPARENT_PRESENTATIONS = [
 
 export default function NativeStackView({ state, descriptors }: Props) {
   const parentHeaderBack = React.useContext(HeaderBackContext);
-  const { buildHref } = useLinkBuilder();
+  const { buildHref } = useLinkTools();
 
   return (
     <SafeAreaProviderCompat>
