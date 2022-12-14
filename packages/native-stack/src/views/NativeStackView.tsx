@@ -55,7 +55,7 @@ export default function NativeStackView({ state, descriptors }: Props) {
                   previousDescriptor.options,
                   previousDescriptor.route.name
                 ),
-                path: buildHref(
+                href: buildHref(
                   previousDescriptor.route.name,
                   previousDescriptor.route.params
                 ),
@@ -131,7 +131,7 @@ export default function NativeStackView({ state, descriptors }: Props) {
                                   : undefined
                               }
                               onPress={navigation.goBack}
-                              href={headerBack.path}
+                              href={headerBack.href}
                             />
                           )
                         : headerLeft
