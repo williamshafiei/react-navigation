@@ -42,7 +42,7 @@ const LinkPressable = ({
         {...rest}
         href={href}
         action={buildAction(href)}
-        style={[styles.button, style]}
+        style={style}
         onPress={(e: any) => {
           if (
             !(e.metaKey || e.altKey || e.ctrlKey || e.shiftKey) && // ignore clicks with modifier keys
@@ -299,8 +299,5 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     resizeMode: 'contain',
     transform: [{ scaleX: I18nManager.getConstants().isRTL ? -1 : 1 }],
-  },
-  button: {
-    display: 'flex',
   },
 });
