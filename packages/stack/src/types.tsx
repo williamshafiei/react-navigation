@@ -197,6 +197,10 @@ export type StackHeaderProps = {
      * Title of the previous screen.
      */
     title: string;
+    /**
+     *
+     */
+    href?: string;
   };
   /**
    * Animated nodes representing the progress of the animation.

@@ -28,6 +28,7 @@ type Props = Omit<StackHeaderOptions, 'headerStatusBarHeight'> & {
   title: string;
   modal: boolean;
   onGoBack?: () => void;
+  href?: string;
   progress: SceneProgress;
   styleInterpolator: StackHeaderStyleInterpolator;
 };
@@ -101,9 +102,12 @@ export default function HeaderSegment(props: Props) {
     layout,
     modal,
     onGoBack,
+    href,
     headerTitle: title,
     headerLeft: left = onGoBack
-      ? (props: HeaderBackButtonProps) => <HeaderBackButton {...props} />
+      ? (props: HeaderBackButtonProps) => (
+          <HeaderBackButton {...props} href={href} />
+        )
       : undefined,
     headerRight: right,
     headerBackImage,
