@@ -198,7 +198,7 @@ export type StackHeaderProps = {
      */
     title: string;
     /**
-     *
+     * The `href` to use for the anchor tag on web
      */
     href?: string;
   };

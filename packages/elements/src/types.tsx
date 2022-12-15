@@ -180,7 +180,7 @@ export type HeaderBackButtonProps = HeaderButtonProps & {
    */
   backImage?: (props: { tintColor: string }) => React.ReactNode;
   /**
-   *
+   * The `href` to use for the anchor tag on web
    */
   href?: string;
   /**
