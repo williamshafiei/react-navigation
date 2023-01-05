@@ -1,4 +1,4 @@
-import { Link, useLinkTools, useTheme } from '@react-navigation/native';
+import { useTheme } from '@react-navigation/native';
 import * as React from 'react';
 import {
   Animated,
@@ -6,73 +6,13 @@ import {
   Image,
   LayoutChangeEvent,
   Platform,
-  StyleProp,
   StyleSheet,
   View,
-  ViewStyle,
 } from 'react-native';
 
 import MaskedView from '../MaskedView';
 import PlatformPressable from '../PlatformPressable';
 import type { HeaderBackButtonProps } from '../types';
-
-const LinkPressable = ({
-  href,
-  children,
-  style,
-  onPress,
-  onLongPress,
-  onPressIn,
-  onPressOut,
-  accessibilityRole,
-  ...rest
-}: Omit<React.ComponentProps<typeof PlatformPressable>, 'style'> & {
-  style: StyleProp<ViewStyle>;
-} & {
-  href?: string;
-  children: React.ReactNode;
-  onPress?: () => void;
-}) => {
-  const { buildAction } = useLinkTools();
-  if (Platform.OS === 'web' && href) {
-    // React Native Web doesn't forward `onClick` if we use `TouchableWithoutFeedback`.
-    // We need to use `onClick` to be able to prevent default browser handling of links.
-    return (
-      <Link
-        {...rest}
-        href={href}
-        action={buildAction(href)}
-        style={style}
-        onPress={(e: any) => {
-          if (
-            !(e.metaKey || e.altKey || e.ctrlKey || e.shiftKey) && // ignore clicks with modifier keys
-            (e.button == null || e.button === 0) // ignore everything but left clicks
-          ) {
-            e.preventDefault();
-            onPress?.(e);
-          }
-        }}
-        // types for PressableProps and TextProps are incompatible with each other by `null` so we
-        // can't use {...rest} for these 3 props
-        onLongPress={onLongPress ?? undefined}
-        onPressIn={onPressIn ?? undefined}
-        onPressOut={onPressOut ?? undefined}
-      >
-        {children}
-      </Link>
-    );
-  } else {
-    return (
-      <PlatformPressable
-        {...rest}
-        accessibilityRole={accessibilityRole}
-        onPress={onPress}
-      >
-        <View style={style}>{children}</View>
-      </PlatformPressable>
-    );
-  }
-};
 
 export default function HeaderBackButton({
   disabled,
@@ -202,14 +142,24 @@ export default function HeaderBackButton({
     );
   };
 
-  const handlePress = () => onPress && requestAnimationFrame(onPress);
+  const handlePress = (e: any) => {
+    const ignoreEvents =
+      !(e.metaKey || e.altKey || e.ctrlKey || e.shiftKey) && // ignore clicks with modifier keys
+      (e.button == null || e.button === 0); // ignore everything but left clicks
+
+    if (Platform.OS === 'web' && href && ignoreEvents) {
+      e.preventDefault();
+    }
+
+    return onPress && requestAnimationFrame(onPress);
+  };
 
   return (
-    <LinkPressable
+    <PlatformPressable
       disabled={disabled}
       href={href}
       accessible
-      accessibilityRole="button"
+      accessibilityRole={Platform.OS === 'web' && href ? 'link' : 'button'}
       accessibilityLabel={accessibilityLabel}
       testID={testID}
       onPress={disabled ? undefined : handlePress}
@@ -226,7 +176,7 @@ export default function HeaderBackButton({
         {renderBackImage()}
         {renderLabel()}
       </React.Fragment>
-    </LinkPressable>
+    </PlatformPressable>
   );
 }
 
