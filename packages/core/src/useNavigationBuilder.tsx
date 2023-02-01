@@ -33,7 +33,9 @@ import {
 import useChildListeners from './useChildListeners';
 import useComponent from './useComponent';
 import useCurrentRender from './useCurrentRender';
-import useDescriptors, { ScreenConfigWithParent } from './useDescriptors';
+import useDescriptorsBuilder, {
+  ScreenConfigWithParent,
+} from './useDescriptorsBuilder';
 import useEventEmitter from './useEventEmitter';
 import useFocusedListenersChildrenAdapter from './useFocusedListenersChildrenAdapter';
 import useFocusEvents from './useFocusEvents';
@@ -685,7 +687,7 @@ export default function useNavigationBuilder<
     getStateListeners: keyedListeners.getState,
   });
 
-  const descriptors = useDescriptors<
+  const descriptors = useDescriptorsBuilder<
     State,
     ActionHelpers,
     ScreenOptions,
@@ -713,11 +715,15 @@ export default function useNavigationBuilder<
     descriptors,
   });
 
-  const NavigationContent = useComponent((children: React.ReactNode) => (
-    <NavigationHelpersContext.Provider value={navigation}>
-      <PreventRemoveProvider>{children}</PreventRemoveProvider>
-    </NavigationHelpersContext.Provider>
-  ));
+  const NavigationContent = useComponent((element: React.ReactNode) => {
+    const children = <PreventRemoveProvider>{element}</PreventRemoveProvider>;
+
+    return (
+      <NavigationHelpersContext.Provider value={navigation}>
+        {options.layout ? options.layout({ children }) : children}
+      </NavigationHelpersContext.Provider>
+    );
+  });
 
   return {
     state,

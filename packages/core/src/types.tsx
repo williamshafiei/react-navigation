@@ -26,9 +26,32 @@ export type DefaultNavigatorOptions<
   EventMap extends EventMapBase
 > = DefaultRouterOptions<Keyof<ParamList>> & {
   /**
-   * Optional ID for the navigator. Can be used with `navigation.getParent(id)` to refer to a parent.
+   * Optional unique ID for the navigator.
+   * It can be used with `navigation.getParent(id)` to refer to a parent.
    */
   id?: string;
+  /**
+   * Optional callback that wrap's the navigator's content.
+   * The components inside the layout have access to the navigator's context.
+   * This can be used to render persistent UI elements in the navigator.
+   *
+   * @example
+   * ```js
+   * const MyLayout = ({ children }) => {
+   *   return (
+   *     <View>
+   *       {children}
+   *       <MyFooter />
+   *     </View>
+   *   );
+   * }
+   *
+   * // ...
+   *
+   * <Stack.Navigator layout={props => <MyLayout {...props} />}>
+   * ```
+   */
+  layout?: (options: { children: React.ReactNode }) => React.ReactNode;
   /**
    * Children React Elements to extract the route configuration from.
    * Only `Screen`, `Group` and `React.Fragment` are supported as children.

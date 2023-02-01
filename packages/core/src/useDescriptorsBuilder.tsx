@@ -79,7 +79,7 @@ type Options<
  * - Options specified by the screen for the navigator
  * - Navigation object intended for the route
  */
-export default function useDescriptors<
+export default function useDescriptorsBuilder<
   State extends NavigationState,
   ActionHelpers extends Record<string, () => void>,
   ScreenOptions extends {},

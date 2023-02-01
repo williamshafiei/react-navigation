@@ -28,6 +28,7 @@ type Props = DefaultNavigatorOptions<
 
 function DrawerNavigator({
   id,
+  layout,
   initialRouteName,
   defaultStatus = 'closed',
   backBehavior,
@@ -45,6 +46,7 @@ function DrawerNavigator({
       DrawerNavigationEventMap
     >(DrawerRouter, {
       id,
+      layout,
       initialRouteName,
       defaultStatus,
       backBehavior,

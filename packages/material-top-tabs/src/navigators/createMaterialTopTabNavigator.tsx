@@ -28,6 +28,7 @@ type Props = DefaultNavigatorOptions<
 
 function MaterialTopTabNavigator({
   id,
+  layout,
   initialRouteName,
   backBehavior,
   children,
@@ -44,6 +45,7 @@ function MaterialTopTabNavigator({
       MaterialTopTabNavigationEventMap
     >(TabRouter, {
       id,
+      layout,
       initialRouteName,
       backBehavior,
       children,
