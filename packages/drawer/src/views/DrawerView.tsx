@@ -9,6 +9,7 @@ import {
   DrawerNavigationState,
   DrawerStatus,
   ParamListBase,
+  StackActions,
   useTheme,
 } from '@react-navigation/native';
 import * as React from 'react';
@@ -72,6 +73,29 @@ function DrawerViewBase({
   if (!loaded.includes(focusedRouteKey)) {
     setLoaded([...loaded, focusedRouteKey]);
   }
+
+  const previousRouteKeyRef = React.useRef(focusedRouteKey);
+
+  React.useEffect(() => {
+    const previousRouteKey = previousRouteKeyRef.current;
+    const popToTopOnBlur =
+      descriptors[previousRouteKey]?.options.popToTopOnBlur;
+
+    if (previousRouteKey !== focusedRouteKey && popToTopOnBlur) {
+      const prevRoute = state.routes.find(
+        (route) => route.key === previousRouteKey
+      );
+
+      if (prevRoute?.state?.type === 'stack' && prevRoute.state.key) {
+        navigation.dispatch({
+          ...StackActions.popToTop(),
+          target: prevRoute.state.key,
+        });
+      }
+    }
+
+    previousRouteKeyRef.current = focusedRouteKey;
+  }, [descriptors, focusedRouteKey, navigation, state.routes]);
 
   const dimensions = useSafeAreaFrame();
 
@@ -169,12 +193,8 @@ function DrawerViewBase({
       >
         {state.routes.map((route, index) => {
           const descriptor = descriptors[route.key];
-          const { lazy = true, unmountOnBlur } = descriptor.options;
+          const { lazy = true } = descriptor.options;
           const isFocused = state.index === index;
-
-          if (unmountOnBlur && !isFocused) {
-            return null;
-          }
 
           if (lazy && !loaded.includes(route.key) && !isFocused) {
             // Don't render a lazy screen if we've never navigated to it
