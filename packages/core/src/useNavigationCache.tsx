@@ -3,6 +3,7 @@ import {
   NavigationAction,
   NavigationState,
   ParamListBase,
+  Route,
   Router,
 } from '@react-navigation/routers';
 import * as React from 'react';
@@ -20,6 +21,10 @@ type Options<
   getState: () => State;
   navigation: NavigationHelpers<ParamListBase> &
     Partial<NavigationProp<ParamListBase, string, any, any, any>>;
+  getMergedOptions: (args: {
+    route: Route<string>;
+    navigation: NavigationProp<ParamListBase>;
+  }) => ScreenOptions;
   setOptions: (
     cb: (
       options: Record<string, ScreenOptions>
@@ -58,6 +63,7 @@ export default function useNavigationCache<
   state,
   getState,
   navigation,
+  getMergedOptions,
   setOptions,
   router,
   emitter,
@@ -70,7 +76,7 @@ export default function useNavigationCache<
   const cache = React.useMemo(
     () => ({ current: {} as NavigationCache<State, ScreenOptions, EventMap> }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [getState, navigation, setOptions, router, emitter]
+    [getState, navigation, setOptions, getMergedOptions, router, emitter]
   );
 
   const actions = {
@@ -152,11 +158,25 @@ export default function useNavigationCache<
 
           return rest.getParent(id);
         },
-        setOptions: (options: object) =>
+        setOptions: (updater: object | ((mergedOptions: object) => object)) => {
+          let options: object;
+
+          if (typeof updater === 'function') {
+            const mergedOptions = getMergedOptions({
+              route,
+              navigation: acc[route.key],
+            });
+
+            options = updater(mergedOptions);
+          } else {
+            options = updater;
+          }
+
           setOptions((o) => ({
             ...o,
             [route.key]: { ...o[route.key], ...options },
-          })),
+          }));
+        },
         isFocused: () => {
           const state = getState();
 

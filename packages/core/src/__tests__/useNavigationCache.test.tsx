@@ -29,6 +29,7 @@ it('preserves reference for navigation objects', () => {
 
   const getState = () => state;
   const navigation = {} as any;
+  const getMergedOptions = () => ({} as any);
   const setOptions = (() => {}) as any;
   const router = MockRouter({});
 
@@ -40,6 +41,7 @@ it('preserves reference for navigation objects', () => {
       state,
       getState,
       navigation,
+      getMergedOptions,
       setOptions,
       router,
       emitter,

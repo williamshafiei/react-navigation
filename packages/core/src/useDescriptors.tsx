@@ -2,9 +2,11 @@ import type {
   NavigationAction,
   NavigationState,
   ParamListBase,
+  Route,
   Router,
 } from '@react-navigation/routers';
 import * as React from 'react';
+import useLatestCallback from 'use-latest-callback';
 
 import NavigationBuilderContext, {
   AddKeyedListener,
@@ -54,13 +56,6 @@ type Options<
   >;
   navigation: NavigationHelpers<ParamListBase>;
   screenOptions?: ScreenOptionsOrCallback<ScreenOptions>;
-  defaultScreenOptions?:
-    | ScreenOptions
-    | ((props: {
-        route: RouteProp<ParamListBase>;
-        navigation: any;
-        options: ScreenOptions;
-      }) => ScreenOptions);
   onAction: (action: NavigationAction) => boolean;
   getState: () => State;
   setState: (state: State) => void;
@@ -89,7 +84,6 @@ export default function useDescriptors<
   screens,
   navigation,
   screenOptions,
-  defaultScreenOptions,
   onAction,
   getState,
   setState,
@@ -129,10 +123,48 @@ export default function useDescriptors<
     ]
   );
 
+  const getMergedOptions = ({
+    route,
+    options,
+  }: {
+    route: Route<string>;
+    navigation: NavigationProp<ParamListBase>;
+    options?: ScreenOptions;
+  }) => {
+    const config = screens[route.name];
+    const screen = config.props;
+
+    const optionsList = [
+      // The default `screenOptions` passed to the navigator
+      screenOptions,
+      // The `screenOptions` props passed to `Group` elements
+      ...((config.options
+        ? config.options.filter(Boolean)
+        : []) as ScreenOptionsOrCallback<ScreenOptions>[]),
+      // The `options` prop passed to `Screen` elements,
+      screen.options,
+      // Additional options
+      options,
+    ];
+
+    const mergedOptions = optionsList.reduce<ScreenOptions>(
+      (acc, curr) =>
+        Object.assign(
+          acc,
+          // @ts-expect-error: we check for function but TS still complains
+          typeof curr !== 'function' ? curr : curr({ route, navigation })
+        ),
+      {} as ScreenOptions
+    );
+
+    return mergedOptions;
+  };
+
   const navigations = useNavigationCache<State, ScreenOptions, EventMap>({
     state,
     getState,
     navigation,
+    getMergedOptions: useLatestCallback(getMergedOptions),
     setOptions,
     router,
     emitter,
@@ -140,7 +172,7 @@ export default function useDescriptors<
 
   const routes = useRouteCache(state.routes);
 
-  return routes.reduce<
+  const descriptors = routes.reduce<
     Record<
       string,
       Descriptor<
@@ -162,40 +194,12 @@ export default function useDescriptors<
     const screen = config.props;
     const navigation = navigations[route.key];
 
-    const optionsList = [
-      // The default `screenOptions` passed to the navigator
-      screenOptions,
-      // The `screenOptions` props passed to `Group` elements
-      ...((config.options
-        ? config.options.filter(Boolean)
-        : []) as ScreenOptionsOrCallback<ScreenOptions>[]),
-      // The `options` prop passed to `Screen` elements,
-      screen.options,
+    const mergedOptions = getMergedOptions({
+      route,
+      navigation,
       // The options set via `navigation.setOptions`
-      options[route.key],
-    ];
-
-    const customOptions = optionsList.reduce<ScreenOptions>(
-      (acc, curr) =>
-        Object.assign(
-          acc,
-          // @ts-expect-error: we check for function but TS still complains
-          typeof curr !== 'function' ? curr : curr({ route, navigation })
-        ),
-      {} as ScreenOptions
-    );
-
-    const mergedOptions = {
-      ...(typeof defaultScreenOptions === 'function'
-        ? // @ts-expect-error: ts gives incorrect error here
-          defaultScreenOptions({
-            route,
-            navigation,
-            options: customOptions,
-          })
-        : defaultScreenOptions),
-      ...customOptions,
-    };
+      options: options[route.key],
+    });
 
     const clearOptions = () =>
       setOptions((o) => {
@@ -239,4 +243,6 @@ export default function useDescriptors<
 
     return acc;
   }, {});
+
+  return descriptors;
 }
