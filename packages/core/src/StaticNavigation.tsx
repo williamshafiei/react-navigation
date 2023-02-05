@@ -8,11 +8,12 @@ import type {
   NavigatorScreenParams,
   PathConfig,
   RouteConfig,
+  RouteGroupConfig,
 } from './types';
 import useRoute from './useRoute';
 
 /**
- * Flatten a type recursively to remove all type alias names.
+ * Flatten a type to remove all type alias names.
  */
 type FlatType<T> = T extends object ? { [K in keyof T]: T[K] } : T;
 
@@ -42,6 +43,32 @@ type ParamListForScreens<
 > = {
   [Key in keyof Screens]: ParamsForScreen<Screens[Key]>;
 };
+
+type ParamListForGroups<
+  Groups extends
+    | Readonly<{
+        [key: string]: {
+          screens: StaticConfigScreens<
+            ParamListBase,
+            NavigationState,
+            {},
+            EventMapBase
+          >;
+        };
+      }>
+    | undefined
+> = Groups extends {
+  [key: string]: {
+    screens: StaticConfigScreens<
+      ParamListBase,
+      NavigationState,
+      {},
+      EventMapBase
+    >;
+  };
+}
+  ? ParamListForScreens<Groups[keyof Groups]['screens']>
+  : {};
 
 type StaticConfigScreens<
   ParamList extends ParamListBase,
@@ -96,6 +123,23 @@ type StaticConfigScreens<
       });
 };
 
+type GroupConfig<
+  ParamList extends ParamListBase,
+  State extends NavigationState,
+  ScreenOptions extends {},
+  EventMap extends EventMapBase
+> = Omit<RouteGroupConfig<ParamList, ScreenOptions>, 'screens' | 'children'> & {
+  /**
+   * Callback to determine whether the screens in the group should be rendered or not.
+   * This can be useful for conditional rendering of group of screens.
+   */
+  if?: () => boolean;
+  /**
+   * Static navigation config or Component to render for the screen.
+   */
+  screens: StaticConfigScreens<ParamList, State, ScreenOptions, EventMap>;
+};
+
 export type StaticConfig<
   ParamList extends ParamListBase,
   State extends NavigationState,
@@ -119,6 +163,12 @@ export type StaticConfig<
    * Screens to render in the navigator and their configuration.
    */
   screens: StaticConfigScreens<ParamList, State, ScreenOptions, EventMap>;
+  /**
+   * Groups of screens to render in the navigator and their configuration.
+   */
+  groups?: {
+    [key: string]: GroupConfig<ParamList, State, ScreenOptions, EventMap>;
+  };
 };
 
 /**
@@ -143,9 +193,20 @@ export type StaticParamList<
         {},
         EventMapBase
       >;
+      readonly groups?: {
+        [key: string]: {
+          screens: StaticConfigScreens<
+            ParamListBase,
+            NavigationState,
+            {},
+            EventMapBase
+          >;
+        };
+      };
     };
   }
-> = ParamListForScreens<T['config']['screens']>;
+> = ParamListForScreens<T['config']['screens']> &
+  ParamListForGroups<T['config']['groups']>;
 
 export type StaticNavigation<NavigatorProps, ScreenProps> = {
   Navigator: React.ComponentType<NavigatorProps>;

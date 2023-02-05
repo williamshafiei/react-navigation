@@ -26,6 +26,19 @@ const RootStack = createStackNavigator({
     },
     Settings: () => null,
   },
+  groups: {
+    Guest: {
+      screens: {
+        Login: () => null,
+        Register: () => null,
+      },
+    },
+    User: {
+      screens: {
+        Account: () => null,
+      },
+    },
+  },
 });
 
 type ParamList = StaticParamList<typeof RootStack>;
