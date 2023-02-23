@@ -99,7 +99,9 @@ export default function useDescriptors<
   router,
   emitter,
 }: Options<State, ScreenOptions, EventMap>) {
-  const [options, setOptions] = React.useState<Record<string, object>>({});
+  const [options, setOptions] = React.useState<Record<string, ScreenOptions>>(
+    {}
+  );
   const { onDispatchAction, onOptionsChange, stackRef } = React.useContext(
     NavigationBuilderContext
   );
@@ -177,6 +179,7 @@ export default function useDescriptors<
       (acc, curr) =>
         Object.assign(
           acc,
+          // @ts-expect-error: we check for function but TS still complains
           typeof curr !== 'function' ? curr : curr({ route, navigation })
         ),
       {} as ScreenOptions
@@ -205,29 +208,31 @@ export default function useDescriptors<
         return o;
       });
 
+    const element = (
+      <NavigationBuilderContext.Provider key={route.key} value={context}>
+        <NavigationContext.Provider value={navigation}>
+          <NavigationRouteContext.Provider value={route}>
+            <SceneView
+              navigation={navigation}
+              route={route}
+              screen={screen}
+              routeState={state.routes[i].state}
+              getState={getState}
+              setState={setState}
+              options={mergedOptions}
+              clearOptions={clearOptions}
+            />
+          </NavigationRouteContext.Provider>
+        </NavigationContext.Provider>
+      </NavigationBuilderContext.Provider>
+    );
+
     acc[route.key] = {
       route,
       // @ts-expect-error: it's missing action helpers, fix later
       navigation,
       render() {
-        return (
-          <NavigationBuilderContext.Provider key={route.key} value={context}>
-            <NavigationContext.Provider value={navigation}>
-              <NavigationRouteContext.Provider value={route}>
-                <SceneView
-                  navigation={navigation}
-                  route={route}
-                  screen={screen}
-                  routeState={state.routes[i].state}
-                  getState={getState}
-                  setState={setState}
-                  options={mergedOptions}
-                  clearOptions={clearOptions}
-                />
-              </NavigationRouteContext.Provider>
-            </NavigationContext.Provider>
-          </NavigationBuilderContext.Provider>
-        );
+        return element;
       },
       options: mergedOptions as ScreenOptions,
     };

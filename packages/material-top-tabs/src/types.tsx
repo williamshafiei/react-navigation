@@ -9,7 +9,12 @@ import type {
   TabNavigationState,
 } from '@react-navigation/native';
 import type React from 'react';
-import type { StyleProp, TextStyle, ViewStyle } from 'react-native';
+import type {
+  PressableAndroidRippleConfig,
+  StyleProp,
+  TextStyle,
+  ViewStyle,
+} from 'react-native';
 import type {
   SceneRendererProps,
   TabBar,
@@ -140,7 +145,7 @@ export type MaterialTopTabNavigationOptions = {
   /**
    * ID to locate this tab button in tests.
    */
-  tabBarTestID?: string;
+  tabBarButtonTestID?: string;
 
   /**
    * Color for the icon and label in the active tab.
@@ -203,6 +208,13 @@ export type MaterialTopTabNavigationOptions = {
    * Gap between tabs
    */
   tabBarGap?: number;
+
+  /**
+   * Allows to customize the android ripple effect (Android >= 5.0 only).
+   *
+   * Default: `{ borderless: true }`
+   */
+  tabBarAndroidRipple?: PressableAndroidRippleConfig;
 
   /**
    * Whether to enable swipe gestures when this screen is focused.

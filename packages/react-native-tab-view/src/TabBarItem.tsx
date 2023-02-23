@@ -2,6 +2,7 @@ import * as React from 'react';
 import {
   Animated,
   LayoutChangeEvent,
+  PressableAndroidRippleConfig,
   StyleProp,
   StyleSheet,
   TextStyle,
@@ -14,7 +15,7 @@ import PlatformPressable from './PlatformPressable';
 import type { NavigationState, Route, Scene } from './types';
 
 export type Props<T extends Route> = {
-  position: Animated.AnimatedInterpolation;
+  position: Animated.AnimatedInterpolation<number>;
   route: T;
   navigationState: NavigationState<T>;
   activeColor?: string;
@@ -42,13 +43,14 @@ export type Props<T extends Route> = {
   defaultTabWidth?: number;
   labelStyle?: StyleProp<TextStyle>;
   style: StyleProp<ViewStyle>;
+  android_ripple?: PressableAndroidRippleConfig;
 };
 
 const DEFAULT_ACTIVE_COLOR = 'rgba(255, 255, 255, 1)';
 const DEFAULT_INACTIVE_COLOR = 'rgba(255, 255, 255, 0.7)';
 
 const getActiveOpacity = (
-  position: Animated.AnimatedInterpolation,
+  position: Animated.AnimatedInterpolation<number>,
   routesLength: number,
   tabIndex: number
 ) => {
@@ -65,7 +67,7 @@ const getActiveOpacity = (
 };
 
 const getInactiveOpacity = (
-  position: Animated.AnimatedInterpolation,
+  position: Animated.AnimatedInterpolation<number>,
   routesLength: number,
   tabIndex: number
 ) => {
@@ -113,6 +115,7 @@ const TabBarItemInternal = <T extends Route>({
   defaultTabWidth,
   routesLength,
   renderLabel: renderLabelCustom,
+  android_ripple = { borderless: true },
 }: TabBarItemInternalProps<T>) => {
   const labelColorFromStyle = StyleSheet.flatten(labelStyle || {}).color;
 
@@ -233,7 +236,7 @@ const TabBarItemInternal = <T extends Route>({
 
   return (
     <PlatformPressable
-      android_ripple={{ borderless: true }}
+      android_ripple={android_ripple}
       testID={getTestID(scene)}
       accessible={getAccessible(scene)}
       accessibilityLabel={accessibilityLabel}

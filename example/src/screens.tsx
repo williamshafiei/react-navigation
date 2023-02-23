@@ -2,10 +2,10 @@ import type { NavigatorScreenParams } from '@react-navigation/native';
 
 import AuthFlow from './Screens/AuthFlow';
 import BottomTabs from './Screens/BottomTabs';
+import DrawerView from './Screens/DrawerView';
 import DynamicTabs from './Screens/DynamicTabs';
 import LinkComponent from './Screens/LinkComponent';
 import MasterDetail from './Screens/MasterDetail';
-import MaterialBottomTabs from './Screens/MaterialBottomTabs';
 import MaterialTopTabsScreen from './Screens/MaterialTopTabs';
 import MixedHeaderMode from './Screens/MixedHeaderMode';
 import MixedStack from './Screens/MixedStack';
@@ -17,6 +17,7 @@ import SimpleStack from './Screens/SimpleStack';
 import StackHeaderCustomization from './Screens/StackHeaderCustomization';
 import StackPreventRemove from './Screens/StackPreventRemove';
 import StackTransparent from './Screens/StackTransparent';
+import StaticScreen from './Screens/Static';
 import TabView from './Screens/TabView';
 
 export type RootDrawerParamList = {
@@ -69,10 +70,6 @@ export const SCREENS = {
     title: 'Material Top Tabs',
     component: MaterialTopTabsScreen,
   },
-  MaterialBottomTabs: {
-    title: 'Material Bottom Tabs',
-    component: MaterialBottomTabs,
-  },
   DynamicTabs: {
     title: 'Dynamic Tabs',
     component: DynamicTabs,
@@ -100,6 +97,14 @@ export const SCREENS = {
   TabView: {
     title: 'TabView',
     component: TabView,
+  },
+  DrawerView: {
+    title: 'DrawerView',
+    component: DrawerView,
+  },
+  Static: {
+    title: 'Static config',
+    component: StaticScreen,
   },
 };
 

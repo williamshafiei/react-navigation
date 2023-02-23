@@ -163,7 +163,7 @@ export type BottomTabNavigationOptions = HeaderOptions & {
   /**
    * ID to locate this tab button in tests.
    */
-  tabBarTestID?: string;
+  tabBarButtonTestID?: string;
 
   /**
    * Function which returns a React element to render as the tab bar button.
@@ -321,7 +321,7 @@ export type BottomTabBarButtonProps = Omit<
   TouchableWithoutFeedbackProps,
   'onPress'
 > & {
-  to?: string;
+  href?: string;
   children: React.ReactNode;
   onPress?: (
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent> | GestureResponderEvent

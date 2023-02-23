@@ -3,30 +3,6 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-## [6.3.12](https://github.com/react-navigation/react-navigation/compare/@react-navigation/stack@6.3.11...@react-navigation/stack@6.3.12) (2023-01-31)
-
-**Note:** Version bump only for package @react-navigation/stack
-
-## [6.3.11](https://github.com/react-navigation/react-navigation/compare/@react-navigation/stack@6.3.10...@react-navigation/stack@6.3.11) (2023-01-10)
-
-**Note:** Version bump only for package @react-navigation/stack
-
-## [6.3.10](https://github.com/react-navigation/react-navigation/compare/@react-navigation/stack@6.3.9...@react-navigation/stack@6.3.10) (2022-12-16)
-
-**Note:** Version bump only for package @react-navigation/stack
-
-## [6.3.9](https://github.com/react-navigation/react-navigation/compare/@react-navigation/stack@6.3.8...@react-navigation/stack@6.3.9) (2022-12-12)
-
-**Note:** Version bump only for package @react-navigation/stack
-
-## [6.3.8](https://github.com/react-navigation/react-navigation/compare/@react-navigation/stack@6.3.7...@react-navigation/stack@6.3.8) (2022-12-07)
-
-**Note:** Version bump only for package @react-navigation/stack
-
-## [6.3.7](https://github.com/react-navigation/react-navigation/compare/@react-navigation/stack@6.3.5...@react-navigation/stack@6.3.7) (2022-11-29)
-
-**Note:** Version bump only for package @react-navigation/stack
-
 ## [6.3.5](https://github.com/react-navigation/react-navigation/compare/@react-navigation/stack@6.3.4...@react-navigation/stack@6.3.5) (2022-11-21)
 
 ### Bug Fixes

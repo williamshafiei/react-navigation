@@ -63,9 +63,23 @@ type NavigationBuilderOptions<ScreenOptions extends {}> = {
       }) => ScreenOptions);
 };
 
-type NavigatorRoute<State extends NavigationState> = {
+type NavigationBuilderOptions<ScreenOptions extends {}> = {
+  /**
+   * Default options specified by the navigator.
+   * It receives the custom options in the arguments if a function is specified.
+   */
+  defaultScreenOptions?:
+    | ScreenOptions
+    | ((props: {
+        route: RouteProp<ParamListBase>;
+        navigation: any;
+        options: ScreenOptions;
+      }) => ScreenOptions);
+};
+
+type NavigatorRoute = {
   key: string;
-  params?: NavigatorScreenParams<ParamListBase, State>;
+  params?: NavigatorScreenParams<ParamListBase>;
 };
 
 const isValidKey = (key: unknown) =>
@@ -153,7 +167,12 @@ const getRouteConfigsFromChildren = <
           ? `'${
               typeof child.type === 'string' ? child.type : child.type?.name
             }'${
-              child.props?.name ? ` for the screen '${child.props.name}'` : ''
+              child.props != null &&
+              typeof child.props === 'object' &&
+              'name' in child.props &&
+              child.props?.name
+                ? ` for the screen '${child.props.name}'`
+                : ''
             }`
           : typeof child === 'object'
           ? JSON.stringify(child)
@@ -267,7 +286,7 @@ export default function useNavigationBuilder<
   const navigatorKey = useRegisterNavigator();
 
   const route = React.useContext(NavigationRouteContext) as
-    | NavigatorRoute<State>
+    | NavigatorRoute
     | undefined;
 
   const { children, screenListeners, ...rest } = options;
@@ -417,7 +436,7 @@ export default function useNavigationBuilder<
     } else {
       return [
         router.getRehydratedState(
-          route?.params?.state ?? (currentState as PartialState<State>),
+          (route?.params?.state ?? currentState) as PartialState<State>,
           {
             routeNames,
             routeParamList: initialRouteParamList,

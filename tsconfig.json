@@ -3,6 +3,7 @@
     "baseUrl": ".",
     "paths": {
       "@react-navigation/*": ["./packages/*/src"],
+      "react-native-drawer-layout": ["./packages/react-native-drawer-layout/src"],
       "react-native-tab-view": ["./packages/react-native-tab-view/src"],
     },
     "composite": true,
@@ -26,5 +27,5 @@
     "strict": true,
     "target": "esnext"
   },
-  "exclude": ["packages/*/lib", "packages/flipper-plugin-react-navigation"]
+  "exclude": ["packages/*/lib"]
 }

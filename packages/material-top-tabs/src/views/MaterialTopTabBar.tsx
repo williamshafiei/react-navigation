@@ -42,13 +42,16 @@ export default function TabBarTop({
         focusedOptions.tabBarIndicatorStyle,
       ]}
       gap={focusedOptions.tabBarGap}
+      android_ripple={focusedOptions.tabBarAndroidRipple}
       indicatorContainerStyle={focusedOptions.tabBarIndicatorContainerStyle}
       contentContainerStyle={focusedOptions.tabBarContentContainerStyle}
       style={[{ backgroundColor: colors.card }, focusedOptions.tabBarStyle]}
       getAccessibilityLabel={({ route }) =>
         descriptors[route.key].options.tabBarAccessibilityLabel
       }
-      getTestID={({ route }) => descriptors[route.key].options.tabBarTestID}
+      getTestID={({ route }) =>
+        descriptors[route.key].options.tabBarButtonTestID
+      }
       onTabPress={({ route, preventDefault }) => {
         const event = navigation.emit({
           type: 'tabPress',

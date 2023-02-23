@@ -1,8 +1,6 @@
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {
-  useFlipper,
-  useReduxDevToolsExtension,
-} from '@react-navigation/devtools';
+import { useReduxDevToolsExtension } from '@react-navigation/devtools';
 import {
   createDrawerNavigator,
   DrawerScreenProps,
@@ -22,17 +20,16 @@ import {
   StackScreenProps,
 } from '@react-navigation/stack';
 import { createURL } from 'expo-linking';
+import * as SplashScreen from 'expo-splash-screen';
 import * as React from 'react';
 import {
-  Dimensions,
   I18nManager,
   Linking,
-  LogBox,
   Platform,
-  ScaledSize,
   ScrollView,
   StatusBar,
   Text,
+  useWindowDimensions,
 } from 'react-native';
 import {
   DarkTheme as PaperDarkTheme,
@@ -42,16 +39,13 @@ import {
   Provider as PaperProvider,
 } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 import { restartApp } from './Restart';
 import { RootDrawerParamList, RootStackParamList, SCREENS } from './screens';
 import NotFound from './Screens/NotFound';
 import SettingsItem from './Shared/SettingsItem';
 
-if (Platform.OS !== 'web') {
-  LogBox.ignoreLogs(['Require cycle:']);
-}
+SplashScreen.preventAutoHideAsync();
 
 const Drawer = createDrawerNavigator<RootDrawerParamList>();
 const Stack = createStackNavigator<RootStackParamList>();
@@ -115,22 +109,11 @@ export default function App() {
     };
   }, [theme.colors, theme.dark]);
 
-  const [dimensions, setDimensions] = React.useState(Dimensions.get('window'));
-
-  React.useEffect(() => {
-    const onDimensionsChange = ({ window }: { window: ScaledSize }) => {
-      setDimensions(window);
-    };
-
-    Dimensions.addEventListener('change', onDimensionsChange);
-
-    return () => Dimensions.removeEventListener('change', onDimensionsChange);
-  }, []);
+  const dimensions = useWindowDimensions();
 
   const navigationRef = useNavigationContainerRef();
 
   useReduxDevToolsExtension(navigationRef);
-  useFlipper(navigationRef);
 
   if (!isReady) {
     return null;
@@ -148,6 +131,9 @@ export default function App() {
       <NavigationContainer
         ref={navigationRef}
         initialState={initialState}
+        onReady={() => {
+          SplashScreen.hideAsync();
+        }}
         onStateChange={(state) =>
           AsyncStorage?.setItem(
             NAVIGATION_PERSISTENCE_KEY,

@@ -38,7 +38,7 @@ export type DrawerNavigationConfig = {
   /**
    * Whether to use the legacy implementation based on Reanimated 1.
    * The new implementation based on Reanimated 2 will perform better,
-   * but you need additional configuration and need to use Hermes with Flipper to debug.
+   * but it's not possible to use Chrome remote debugger.
    *
    * This defaults to `true` if Reanimated 2 is not configured.
    *
@@ -170,6 +170,12 @@ export type DrawerNavigationOptions = HeaderOptions & {
    * The opacity is animated from `0` to `1` when the drawer opens.
    */
   overlayColor?: string;
+
+  /**
+   * Accessibility label for the overlay. This is read by the screen reader when the user taps the overlay.
+   * Defaults to "Close drawer".
+   */
+  overlayAccessibilityLabel?: string;
 
   /**
    * Style object for the component wrapping the screen content.
@@ -310,4 +316,5 @@ export type DrawerProps = {
   swipeEdgeWidth: number;
   swipeEnabled: boolean;
   swipeVelocityThreshold: number;
+  overlayAccessibilityLabel?: string;
 };

@@ -171,7 +171,7 @@ type NavigationHelpersCommon<
    * @param action Action object or update function.
    */
   dispatch(
-    action: NavigationAction | ((state: State) => NavigationAction)
+    action: NavigationAction | ((state: Readonly<State>) => NavigationAction)
   ): void;
 
   /**
@@ -181,7 +181,7 @@ type NavigationHelpersCommon<
    * @param [params] Params object for the route.
    */
   navigate<RouteName extends keyof ParamList>(
-    ...args: // this first condition allows us to iterate over a union type
+    ...args: // This condition allows us to iterate over a union type
     // This is to avoid getting a union of all the params from `ParamList[RouteName]`,
     // which will get our types all mixed up if a union RouteName is passed in.
     RouteName extends unknown
@@ -198,18 +198,56 @@ type NavigationHelpersCommon<
   /**
    * Navigate to a route in current navigation tree.
    *
-   * @param route Object with `key` or `name` for the route to navigate to, and a `params` object.
+   * @param route Object with `name` for the route to navigate to, and a `params` object.
    */
   navigate<RouteName extends keyof ParamList>(
     options: RouteName extends unknown
-      ?
-          | { key: string; params?: ParamList[RouteName]; merge?: boolean }
-          | {
-              name: RouteName;
-              key?: string;
-              params: ParamList[RouteName];
-              merge?: boolean;
-            }
+      ? {
+          name: RouteName;
+          params: ParamList[RouteName];
+          path?: string;
+          merge?: boolean;
+        }
+      : never
+  ): void;
+
+  /**
+   * Navigate to a route in current navigation tree.
+   *
+   * @deprecated Use `navigate` instead.
+   *
+   * @param name Route name of the route.
+   * @param [params] Params object for the route.
+   */
+  navigateDeprecated<RouteName extends keyof ParamList>(
+    ...args: // This condition allows us to iterate over a union type
+    // This is to avoid getting a union of all the params from `ParamList[RouteName]`,
+    // which will get our types all mixed up if a union RouteName is passed in.
+    RouteName extends unknown
+      ? // This condition checks if the params are optional,
+        // which means it's either undefined or a union with undefined
+        undefined extends ParamList[RouteName]
+        ?
+            | [screen: RouteName] // if the params are optional, we don't have to provide it
+            | [screen: RouteName, params: ParamList[RouteName]]
+        : [screen: RouteName, params: ParamList[RouteName]]
+      : never
+  ): void;
+
+  /**
+   * Navigate to a route in current navigation tree.
+   *
+   * @deprecated Use `navigate` instead.
+   *
+   * @param route Object with `name` for the route to navigate to, and a `params` object.
+   */
+  navigateDeprecated<RouteName extends keyof ParamList>(
+    options: RouteName extends unknown
+      ? {
+          name: RouteName;
+          params: ParamList[RouteName];
+          merge?: boolean;
+        }
       : never
   ): void;
 
@@ -285,17 +323,25 @@ export type NavigationContainerProps = {
   /**
    * Callback which is called with the latest navigation state when it changes.
    */
-  onStateChange?: (state: NavigationState | undefined) => void;
+  onStateChange?: (state: Readonly<NavigationState> | undefined) => void;
+  /**
+   * Callback which is called after the navigation tree mounts.
+   */
+  onReady?: () => void;
   /**
    * Callback which is called when an action is not handled.
    */
-  onUnhandledAction?: (action: NavigationAction) => void;
+  onUnhandledAction?: (action: Readonly<NavigationAction>) => void;
   /**
-   * Whether this navigation container should be independent of parent containers.
-   * If this is not set to `true`, this container cannot be nested inside another container.
-   * Setting it to `true` disconnects any children navigators from parent container.
+   * Whether child navigator should handle a navigation action.
+   * The child navigator needs to be mounted before it can handle the action.
+   * Defaults to `false`.
+   *
+   * This will be removed in the next major release.
+   *
+   * @deprecated Use nested navigation API instead
    */
-  independent?: boolean;
+  navigationInChildEnabled?: boolean;
   /**
    * Children elements to render.
    */
@@ -335,7 +381,7 @@ export type NavigationProp<
    * Update the options for the route.
    * The options object will be shallow merged with default options object.
    *
-   * @param options Options object for the route.
+   * @param update Options object or a callback which takes the options from navigator config and returns a new options object.
    */
   setOptions(options: Partial<ScreenOptions>): void;
 } & EventConsumer<EventMap & EventMapCore<State>> &
@@ -372,11 +418,9 @@ export type CompositeNavigationProp<
      */
     A extends NavigationProp<any, any, any, infer S> ? S : NavigationState,
     /**
-     * Screen options from both navigation objects needs to be combined
-     * This allows typechecking `setOptions`
+     * Screen options should refer to the options specified in the first type
      */
-    (A extends NavigationProp<any, any, any, any, infer O> ? O : {}) &
-      (B extends NavigationProp<any, any, any, any, infer P> ? P : {}),
+    A extends NavigationProp<any, any, any, any, infer O> ? O : {},
     /**
      * Event consumer config should refer to the config specified in the first type
      * This allows typechecking `addListener`/`removeListener`
@@ -527,7 +571,11 @@ export type RouteConfig<
    * For a given screen name, there will always be only one screen corresponding to an ID.
    * If `undefined` is returned, it acts same as no `getId` being specified.
    */
-  getId?: ({ params }: { params: ParamList[RouteName] }) => string | undefined;
+  getId?: ({
+    params,
+  }: {
+    params: Readonly<ParamList[RouteName]>;
+  }) => string | undefined;
 
   /**
    * Initial params object for the route.
@@ -661,16 +709,13 @@ export type TypedNavigator<
   ) => null;
 };
 
-export type NavigatorScreenParams<
-  ParamList,
-  State extends NavigationState = NavigationState
-> =
+export type NavigatorScreenParams<ParamList extends {}> =
   | {
       screen?: never;
       params?: never;
       initial?: never;
       path?: string;
-      state: PartialState<State> | State | undefined;
+      state: PartialState<NavigationState> | NavigationState | undefined;
     }
   | {
       [RouteName in keyof ParamList]: undefined extends ParamList[RouteName]
@@ -691,18 +736,55 @@ export type NavigatorScreenParams<
     }[keyof ParamList];
 
 export type PathConfig<ParamList extends {}> = {
+  /**
+   * Path string to match against.
+   * e.g. `/users/:id` will match `/users/1` and extract `id` param as `1`.
+   */
   path?: string;
+  /**
+   * Whether the path should be consider parent paths or use the exact path.
+   * By default, paths are relating to the path config on the parent screen.
+   * If `exact` is set to `true`, the parent path configuration is not used.
+   */
   exact?: boolean;
+  /**
+   * An object mapping the param name to a function which parses the param value.
+   *
+   * @example
+   * ```js
+   * parse: {
+   *   id: Number,
+   *   date: (value) => new Date(value)
+   * }
+   * ```
+   */
   parse?: Record<string, (value: string) => any>;
+  /**
+   * An object mapping the param name to a function which converts the param value to a string.
+   * By default, all params are converted to strings using `String(value)`.
+   *
+   * @example
+   * ```js
+   * stringify: {
+   *   date: (value) => value.toISOString()
+   * }
+   * ```
+   */
   stringify?: Record<string, (value: any) => string>;
+  /**
+   * Path configuration for child screens.
+   */
   screens?: PathConfigMap<ParamList>;
+  /**
+   * Name of the initial route to use for the navigator when the path matches.
+   */
   initialRouteName?: keyof ParamList;
 };
 
 export type PathConfigMap<ParamList extends {}> = {
   [RouteName in keyof ParamList]?: NonNullable<
     ParamList[RouteName]
-  > extends NavigatorScreenParams<infer T, any>
+  > extends NavigatorScreenParams<infer T>
     ? string | PathConfig<T>
     : string | Omit<PathConfig<{}>, 'screens' | 'initialRouteName'>;
 };
